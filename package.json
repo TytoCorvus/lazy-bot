@@ -1,0 +1,23 @@
+{
+  "name": "lazy-bot",
+  "version": "1.0.0",
+  "description": "I am a baby project created on a stupid whim",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TytoCorvus/lazy-bot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TytoCorvus/lazy-bot/issues"
+  },
+  "homepage": "https://github.com/TytoCorvus/lazy-bot#readme",
+  "dependencies": {
+    "discord.js": "^12.4.1",
+    "needle": "^2.5.2"
+  }
+}
