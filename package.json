@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/TytoCorvus/lazy-bot#readme",
   "dependencies": {
+    "ava": "^3.13.0",
     "discord.js": "^12.4.1",
     "needle": "^2.5.2"
   }

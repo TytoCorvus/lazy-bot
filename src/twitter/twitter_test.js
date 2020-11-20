@@ -8,12 +8,12 @@ const TWITTER_BEARER_TOKEN = twitter_vars.bearer_token;
 const TWITTER_HOSTNAME = 'api.twitter.com'
 const SEARCH_PATH = '/2/tweets/search/recent'
 
-function search_recent_tweets() {
+function search_recent_tweets(request, callback, errback) {
     return new Promise((resolve, reject) => {
 
         var request_options = {
             hostname: TWITTER_HOSTNAME,
-            path: SEARCH_PATH + `?query=from:realDonaldTrump`,
+            path: SEARCH_PATH + `?query=from:Pokemon`,
             method: `GET`,
             headers: {
                 Authorization: `Bearer ${TWITTER_BEARER_TOKEN}`
@@ -38,11 +38,37 @@ function search_recent_tweets() {
 
         request.end()
 
-    }).then((data) => { console.log("We succeeded!"); console.log(data); }).catch((err) => { console.log("We failed. :("); console.log(err) })
+    }).then((data) => {
+        console.log("We succeeded!");
+        callback(data);
+    }).catch((err) => {
+        errback(err);
+        console.log("We failed. :(");
+    })
+}
+
+function find_matching_tweets(response_body, phrasesArray, allPresent) {
+
+    var matching_string = "legendary";
+    var tweets = JSON.parse(response_body).data.filter(tweet =>
+        tweet.text.match(matching_string)
+    )
+
+    tweets.forEach(tweet => {
+
+
+        console.log(tweet.text)
+    }
+}
+
+function find_recent_matching_tweets(accountId, phrasesArray, allPresent) {
+
 }
 
 
-search_recent_tweets();
+module.exports = find_recent_matching_tweets
+
+search_recent_tweets({}, (response_body) => { find_matching_tweets(response_body) }, () => { console.log("We did indeed die somwehere along the way.") });
 
 
 
