@@ -1,3 +1,6 @@
+var Twitter = require('./src/twitter/Twitter')
+var twitter = new Twitter()
+
 function message_response(message) {
     responses.forEach(response => {
         if (response.exact) {
@@ -39,6 +42,23 @@ var responses = [
         "compare": "Dayne",
         "action": (message) => {
             message.channel.send("I heard about him. He's VERY stinky.")
+        }
+    },
+    {
+        "exact": false,
+        "compare": "!twitter_test",
+        "action": (message) => {
+            var variables = message.content.split(' ')
+
+            twitter.find_recent_matching_tweets({ twitter_handle: variables[1], phrases_array: [variables[2]], all_present: true })
+                .then((id_array) => {
+                    if (id_array == undefined || id_array.length == 0) {
+                        message.channel.send('I\'m sorry, I wasn\'t able to find any tweets like that')
+                    } else {
+                        message.channel.send(twitter.build_status_link(id_array[0]))
+                    }
+                })
+                .catch((err) => { console.log('we failed to do the twitter thing. :(') })
         }
     }
 
