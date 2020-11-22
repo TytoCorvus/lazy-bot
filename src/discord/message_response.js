@@ -1,4 +1,5 @@
 var Twitter = require('../twitter/Twitter')
+var Mongo_dao = require('../mongo/mongo_dao')
 var twitter = new Twitter()
 
 function message_response(message) {
@@ -63,8 +64,20 @@ var responses = [
                     })
             }
         }
+    },
+    {
+        'exact': false,
+        'compare': '!monitoring',
+        'action': (message) => {
+            var variables = message.content.split(' ')
+            var mongo = new Mongo_dao()
+            mongo.get_monitor_list((results) => {
+                var return_message_base = variables.length > 1 ? `Monitors on @${variables[1]}` : `I am watching:\n`
+                var return_message = results.map(monitor => { return `@${monitor.twitter_handle} for: ${JSON.stringify(monitor.keywords)}` }).join('\n')
+                message.channel.send(return_message_base + return_message)
+            }, variables[1]);
+        }
     }
-
 ]
 
 module.exports = message_response
