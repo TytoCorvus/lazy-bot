@@ -1,12 +1,10 @@
 var https = require('https')
 var { StringDecoder } = require('string_decoder')
-var querystring = require('querystring')
 var twitter_vars = require('../../env_variables/twitter_vars')
 
 const TWITTER_BEARER_TOKEN = twitter_vars.bearer_token
 const TWITTER_HOSTNAME = 'api.twitter.com'
 const SEARCH_PATH = '/2/tweets/search/recent'
-
 
 class Twitter { 
     STATUS_URI_BASE = `twitter.com/i/web/status/`
@@ -75,11 +73,5 @@ Twitter.prototype.tweet_matches = function (tweet, phrases_array, all_present, c
 Twitter.prototype.build_status_link = function(tweet_id){
     return 'https://' + this.STATUS_URI_BASE + tweet_id
 }
-
-//Example usage for find_recent_matching_tweets
-//var twitter = new Twitter()
-// twitter.find_recent_matching_tweets({twitter_handle:'pokemon', phrases_array:['legendary', 'dragon'], all_present:false})
-//     .then((arr) => {console.log(arr[0])})
-//     .catch((err) => {console.log(`It didn't work :( \n ${err}`)})
 
 module.exports = Twitter

@@ -1,7 +1,7 @@
 // Import the discord.js module
 const Discord = require('discord.js');
 const { clientToken } = require('./env_variables/discord_vars')
-const message_response = require('./message_response')
+const message_response = require('./src/discord/message_response')
 
 // Create an instance of a Discord client
 const client = new Discord.Client();
