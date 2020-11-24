@@ -61,7 +61,7 @@ var responses = [
     {
         'exact': true,
         'type': 'command',
-        'compare': '$what',
+        'compare': '>what',
         'description': 'Quick overview of my tasks',
         'usage': '',
         'action': (message) => {
@@ -71,7 +71,7 @@ var responses = [
     {
         'exact': false,
         'type': 'command',
-        'compare': '$usage',
+        'compare': '>usage',
         'description': 'Explain how to use a command',
         'usage': '$usage <command>',
         'action': (message) => {
