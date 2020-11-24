@@ -2,6 +2,7 @@
 const Discord = require('discord.js');
 const { clientToken } = require('./env_variables/discord_vars')
 const message_response = require('./src/discord/message_response')
+const regular_actions = require('./src/regular_actions')
 
 // Create an instance of a Discord client
 const client = new Discord.Client();
@@ -18,3 +19,6 @@ client.on('message', message_response)
 
 //Log our bot in using the token from https://discord.com/developers/applications
 client.login(clientToken);
+
+//Start the cycle where we take action based on what we find
+regular_actions(client)

@@ -11,10 +11,10 @@ class Twitter {
 };
 
 Twitter.prototype.find_recent_matching_tweets = function (match_options) {
-    var {twitter_handle, phrases_array, all_present} = match_options
+    var {twitter_handle, keywords, all_present} = match_options
     return new Promise((resolve, reject) => {
         Twitter.prototype.search_recent_tweets(twitter_handle, (data) => {
-            resolve(this.filter_to_matching_tweets(JSON.parse(data), phrases_array, all_present).map(tweet => tweet.id))
+            resolve(this.filter_to_matching_tweets(JSON.parse(data), keywords, all_present).map(tweet => tweet.id))
         }, (err) => {
             reject(err)
         })
@@ -59,6 +59,9 @@ Twitter.prototype.search_recent_tweets = function (twitter_handle, callback, err
 }
 
 Twitter.prototype.filter_to_matching_tweets = function (response_body, phrases_array, all_present) {
+    if(response_body.data == undefined || response_body.data == null){
+        return []
+    }
     return response_body.data.filter(tweet => this.tweet_matches(tweet, phrases_array, all_present))
 }
 
@@ -75,3 +78,4 @@ Twitter.prototype.build_status_link = function(tweet_id){
 }
 
 module.exports = Twitter
+

@@ -1,5 +1,5 @@
 var Twitter = require('../twitter/Twitter')
-var Mongo_dao = require('../mongo/mongo_dao')
+var mongo = require('../mongo/mongo_dao')
 var twitter = new Twitter()
 
 function message_response(message) {
@@ -30,7 +30,7 @@ var responses = [
     {
         'exact': true,
         'type': 'command',
-        'compare': '!commands',
+        'compare': '>commands',
         'description': 'Lists the commands that I can use',
         'usage': '',
         'action': (message) => {
@@ -41,17 +41,17 @@ var responses = [
     {
         'exact': true,
         'type': 'command',
-        'compare': '!help',
+        'compare': '>help',
         'description': 'Get more information on how to use the bot',
         'usage': '',
         'action': (message) => {
-            message.channel.send(`Type '!commands' for a list of commands and '!usage <command>' for information on how to use it`)
+            message.channel.send(`Type '>commands' for a list of commands and '>usage <command>' for information on how to use it`)
         }
     },
     {
         'exact': true,
         'type': 'command',
-        'compare': '!who',
+        'compare': '>who',
         'description': 'Quick overview of my purpose',
         'usage': '',
         'action': (message) => {
@@ -61,7 +61,7 @@ var responses = [
     {
         'exact': true,
         'type': 'command',
-        'compare': '!what',
+        'compare': '$what',
         'description': 'Quick overview of my tasks',
         'usage': '',
         'action': (message) => {
@@ -71,9 +71,9 @@ var responses = [
     {
         'exact': false,
         'type': 'command',
-        'compare': '!usage',
+        'compare': '$usage',
         'description': 'Explain how to use a command',
-        'usage': '!usage <command>',
+        'usage': '$usage <command>',
         'action': (message) => {
             var command_text = message.content.split(' ')[1]
             var commands_filtered = commands().filter(item => item.compare === command_text)
@@ -119,9 +119,9 @@ var responses = [
     {
         'exact': false,
         'type': 'command',
-        'compare': '!twitter_test',
+        'compare': '>twitter_test',
         'description': 'Basic twitter search functionality - provide a twitter handle and a keyword list to search their recent tweets for that word. Will link the first one found.',
-        'usage': '!twitter_test <twitter_handle> <keyword>...',
+        'usage': '>twitter_test <twitter_handle> <keyword>...',
         'action': (message) => {
             var variables = message.content.split(' ')
             if (variables.length > 1) {
@@ -142,40 +142,108 @@ var responses = [
     {
         'exact': false,
         'type': 'command',
-        'compare': '!monitoring',
+        'compare': '>monitoring',
         'description': 'List all of the accounts being monitored and for what. Optionally, provide a twitter handle to filter to just that user',
-        'usage': '!monitoring <twitter_handle?>',
+        'usage': '>monitoring <twitter_handle?>',
         'action': (message) => {
             var variables = message.content.split(' ')
-            var mongo = new Mongo_dao()
             mongo.get_monitor_list((results) => {
                 if (results.length < 1) {
-                    message.channel.send(`There are currently no monitors on @${variables[1]}`);
+                    if (variables[1] != undefined && variables[1] != null) {
+                        message.channel.send(`There are currently no monitors on @${variables[1]}`);
+                    } else {
+                        message.channel.send(`There are currently no monitors for the server`)
+                    }
                     return;
                 }
                 var return_message_base = variables.length > 1 ? `Monitors on ` : `I am watching:\n`
                 var return_message = results.map(monitor => { return `@${monitor.twitter_handle} for: ${JSON.stringify(monitor.keywords)}` }).join('\n')
                 message.channel.send(return_message_base + return_message)
-            }, variables[1]);
+            }, message.guild.id, variables[1]);
         }
     },
     {
         'exact': false,
         'type': 'command',
-        'compare': '!add_monitor',
+        'compare': '>add_monitor',
         'description': 'Add an account to monitor and the keywords to look for',
-        'usage': '!add_monitor <twitter_handle> <keyword> <keyword>...',
+        'usage': '>add_monitor <twitter_handle> <keyword>... <User Mention>...',
         'action': (message) => {
             var variables = message.content.split(' ')
-            var mongo = new Mongo_dao()
+
+            var keywords_array = variables.splice(2, variables.length - 2).filter(keyword => !keyword.match('@')) //phrases not including user mentions
+
             mongo.insert_monitor({
                 twitter_handle: variables[1],
-                keywords: variables.splice(2, variables.length - 2),
-                all_present: false
+                keywords: keywords_array,
+                all_present: false,
+                guild_id: message.guild.id,
+                users_listening: message.mentions.users.map(user => user.id)
             })
-                .then((result) => { message.channel.send(`I successfully created your requested monitor!`) })
+                .then((result) => { message.channel.send(`Successfully created your requested monitor!`) })
                 .catch((err) => { message.channel.send(`I had an issue creating this monitor - No changes saved.`) })
+                .finally(() => { mongo.insert_author(variables[1], message.guild.id).then(result => { }).catch((err) => { console.log(`Error inserting author for monitor. ${err}`) }) })
 
+
+
+        }
+    },
+    {
+        'exact': false,
+        'type': 'command',
+        'compare': '>listen',
+        'description': 'Add yourself to monitoring alerts for various twitter feeds',
+        'usage': '>listen <twitter_handle>',
+        'action': (message) => {
+            var variables = message.content.split(' ')
+            if (variables.length < 2) {
+                message.channel.send(`You need to specify a twitter handle to listen for.`)
+                return;
+            }
+
+            mongo.add_listener(variables[1], message.guild.id, message.author.id)
+                .then((result) => {
+                    message.channel.send(`Successfully added you to notifications for ${variables[1]}`)
+                }).catch((err) => {
+                    message.channel.send(`Ran into an error adding you as a listener.`)
+                })
+        }
+    },
+    {
+        'exact': true,
+        'type': 'command',
+        'compare': '>settings',
+        'description': 'Returns the settings for the current guild, such as the default notification channel.',
+        'usage': '>settings',
+        'action': (message) => {
+            var empty_message = `There are currently no settings saved for this server.`
+            mongo.get_guild_settings(message.channel.guild.id)
+                .then((results) => {
+                    if (results.length > 0) {
+                        message.channel.send(empty_message)
+                    } else {
+                        message.channel.send(`The default channel is <#${results.channel_id}>`)
+                    }
+                })
+                .catch((err) => {
+                    message.channel.send(`There was an issue retrieving the settings for this server.`)
+                })
+        }
+    },
+    {
+        'exact': true,
+        'type': 'command',
+        'compare': '>set_channel',
+        'description': 'Updates the notification channel for the server to the current one',
+        'usage': '>set_channel',
+        'action': (message) => {
+            mongo.upsert_guild_settings(message.channel.guild.id, { 'channel_id': message.channel.id })
+                .then((results) => {
+                    message.channel.send(`Default channel successfully updated`)
+                })
+                .catch((err) => {
+                    message.channel.send(`There was an error updating the default channel`)
+                })
         }
     }
 ]
