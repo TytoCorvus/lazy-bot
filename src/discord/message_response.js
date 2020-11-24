@@ -196,12 +196,16 @@ var responses = [
         'usage': '>remove_monitor <twitter_handle>',
         'action': (message) => {
             var variables = message.content.split(' ')
+            if (variables.length < 1) {
+                message.channel.send(`Usage: >remove_monitor <twitter_handle>`)
+                return;
+            }
 
             mongo.remove_monitor({
                 twitter_handle: variables[1],
                 guild_id: message.guild.id
             })
-                .then((result) => { message.channel.send(`Deleted monitors on ${variables[1]}`) })
+                .then((result) => { message.channel.send(`Deleted ${result.deletedCount} monitors on ${variables[1]}`) })
                 .catch((err) => { message.channel.send(`I had an issue deleting monitors - No changes saved.`) })
         }
     },
@@ -220,7 +224,11 @@ var responses = [
 
             mongo.add_listener(variables[1], message.guild.id, message.author.id)
                 .then((result) => {
-                    message.channel.send(`Successfully added you to notifications for ${variables[1]}`)
+                    if (result.modifiedCount == 0) {
+                        message.channel.send(`There are either no monitors or none you aren't already listening to.`)
+                    } else {
+                        message.channel.send(`Successfully added you to ${result.modifiedCount} notifications for ${variables[1]}`)
+                    }
                 }).catch((err) => {
                     message.channel.send(`Ran into an error adding you as a listener.`)
                 })
@@ -241,10 +249,35 @@ var responses = [
 
             mongo.remove_listener(variables[1], message.guild.id, message.author.id)
                 .then((result) => {
-                    message.channel.send(`Successfully removed you from notifications for ${variables[1]}`)
+                    if (result.modifiedCount == 0) {
+                        message.channel.send(`There are no monitors to remove you from.`)
+                    } else {
+                        message.channel.send(`Successfully removed you from ${result.modifiedCount} notifications for ${variables[1]}`)
+                    }
                 }).catch((err) => {
                     message.channel.send(`Ran into an error removing you as a listener.`)
                 })
+        }
+    },
+    {
+        'exact': true,
+        'type': 'command',
+        'compare': '>listening',
+        'description': 'List the alerts that you\'re currently tagged on',
+        'usage': '>listening',
+        'action': (message) => {
+            mongo.get_listening((results) => {
+
+                if (results.length < 1) {
+                    message.channel.send(`You are not currently listening to monitors on this server.`)
+                    return;
+                }
+                var return_message_base = `You are listening to:\n`
+                var return_message = results.map(monitor => { return `@${monitor.twitter_handle} for: ${JSON.stringify(monitor.keywords)}` }).join('\n')
+                message.channel.send(return_message_base + return_message)
+            },
+                message.author.id,
+                message.guild.id)
         }
     },
     {

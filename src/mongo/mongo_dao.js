@@ -39,6 +39,20 @@ class MONGO_DAO {
 })
 }
 
+    MONGO_DAO.prototype.get_listening = function (callback, user_id, guild_id){
+        const collection = this.client.db(this.DATABASE_NAME).collection(this.MONITORING_COLLECTION)
+        var results =[];
+        //Get all monitored for server if nothing specified - else, get the monitors for the twitter listed
+        var query = {
+        'guild_id': guild_id,
+        'users_listening': user_id
+        }
+        var cursor = collection.find(query)
+        cursor.forEach((item) => results.push(item), () => {
+        callback(results);
+    })
+    }
+
     MONGO_DAO.prototype.insert_monitor = function (monitor) {
     const collection = this.client.db(this.DATABASE_NAME).collection(this.MONITORING_COLLECTION)
 
@@ -53,13 +67,13 @@ class MONGO_DAO {
 })
 }
 
-    MONGO_DAO.prototype.remove_monitor = function(twitter_handle, guild_id){
+    MONGO_DAO.prototype.remove_monitor = function(monitor){
         const collection = this.client.db(this.DATABASE_NAME).collection(this.MONITORING_COLLECTION)
 
         return new Promise((resolve, reject) => {
             collection.deleteMany({
-                'twitter_handle':twitter_handle,
-                'guild_id': guild_id
+                'twitter_handle':monitor.twitter_handle,
+                'guild_id': monitor.guild_id
             })
             .then((result) => {resolve(result)})
             .catch((err) => {reject(err)})
