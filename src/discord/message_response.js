@@ -174,7 +174,7 @@ var responses = [
             var keywords_array = variables.splice(2, variables.length - 2).filter(keyword => !keyword.match('@')) //phrases not including user mentions
 
             var user_arr = message.mentions.users.map(user => user.id)
-            user_arr.push(message.user.id)
+            user_arr.push(message.author.id)
 
             mongo.insert_monitor({
                 twitter_handle: variables[1],
