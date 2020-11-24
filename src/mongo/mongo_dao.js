@@ -53,6 +53,19 @@ class MONGO_DAO {
 })
 }
 
+    MONGO_DAO.prototype.remove_monitor = function(twitter_handle, guild_id){
+        const collection = this.client.db(this.DATABASE_NAME).collection(this.MONITORING_COLLECTION)
+
+        return new Promise((resolve, reject) => {
+            collection.deleteMany({
+                'twitter_handle':twitter_handle,
+                'guild_id': guild_id
+            })
+            .then((result) => {resolve(result)})
+            .catch((err) => {reject(err)})
+        })
+    }
+
     MONGO_DAO.prototype.add_listener = function (twitter_handle, guild_id, user_id) {
     const collection = this.client.db(this.DATABASE_NAME).collection(this.MONITORING_COLLECTION)
 
@@ -74,6 +87,26 @@ class MONGO_DAO {
 })
 })
 }
+
+    MONGO_DAO.prototype.remove_listener = function (twitter_handle, guild_id, user_id){
+        const collection = this.client.db(this.DATABASE_NAME).collection(this.MONITORING_COLLECTION)
+
+        return new Promise((resolve, reject) => {
+            collection.updateMany({
+                'twitter_handle': twitter_handle,
+                'guild_id': guild_id
+            },{
+                '$pull': {
+                    'users_listening': user_id
+                }
+            }).then((result) => {
+                resolve(result);
+            }).catch((err) => {
+                reject(err);
+            })
+        })
+       
+    }
 
     MONGO_DAO.prototype.find_author = function (twitter_handle) {
     const collection = this.client.db(this.DATABASE_NAME).collection(this.REPORTING_HISTORY_COLLECTION)

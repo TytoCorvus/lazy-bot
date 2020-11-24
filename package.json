@@ -4,7 +4,8 @@
   "description": "I am a baby project created on a stupid whim",
   "main": "app.js",
   "scripts": {
-    "test": "ava"
+    "test": "ava",
+    "start": "node app"
   },
   "repository": {
     "type": "git",

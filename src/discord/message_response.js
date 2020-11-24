@@ -142,9 +142,9 @@ var responses = [
     {
         'exact': false,
         'type': 'command',
-        'compare': '>monitoring',
+        'compare': '>monitors',
         'description': 'List all of the accounts being monitored and for what. Optionally, provide a twitter handle to filter to just that user',
-        'usage': '>monitoring <twitter_handle?>',
+        'usage': '>monitors <twitter_handle?>',
         'action': (message) => {
             var variables = message.content.split(' ')
             mongo.get_monitor_list((results) => {
@@ -166,26 +166,43 @@ var responses = [
         'exact': false,
         'type': 'command',
         'compare': '>add_monitor',
-        'description': 'Add an account to monitor and the keywords to look for',
+        'description': 'Add an account to monitor and the keywords to look for. Automatically tags the creator.',
         'usage': '>add_monitor <twitter_handle> <keyword>... <User Mention>...',
         'action': (message) => {
             var variables = message.content.split(' ')
 
             var keywords_array = variables.splice(2, variables.length - 2).filter(keyword => !keyword.match('@')) //phrases not including user mentions
 
+            var user_arr = message.mentions.users.map(user => user.id)
+            user_arr.push(message.user.id)
+
             mongo.insert_monitor({
                 twitter_handle: variables[1],
                 keywords: keywords_array,
                 all_present: false,
                 guild_id: message.guild.id,
-                users_listening: message.mentions.users.map(user => user.id)
+                users_listening: user_arr
             })
                 .then((result) => { message.channel.send(`Successfully created your requested monitor!`) })
                 .catch((err) => { message.channel.send(`I had an issue creating this monitor - No changes saved.`) })
                 .finally(() => { mongo.insert_author(variables[1], message.guild.id).then(result => { }).catch((err) => { console.log(`Error inserting author for monitor. ${err}`) }) })
+        }
+    },
+    {
+        'exact': false,
+        'type': 'command',
+        'compare': '>remove_monitor',
+        'description': 'Removes all monitors for this twitter_handle on this server',
+        'usage': '>remove_monitor <twitter_handle>',
+        'action': (message) => {
+            var variables = message.content.split(' ')
 
-
-
+            mongo.remove_monitor({
+                twitter_handle: variables[1],
+                guild_id: message.guild.id
+            })
+                .then((result) => { message.channel.send(`Deleted monitors on ${variables[1]}`) })
+                .catch((err) => { message.channel.send(`I had an issue deleting monitors - No changes saved.`) })
         }
     },
     {
@@ -206,6 +223,27 @@ var responses = [
                     message.channel.send(`Successfully added you to notifications for ${variables[1]}`)
                 }).catch((err) => {
                     message.channel.send(`Ran into an error adding you as a listener.`)
+                })
+        }
+    },
+    {
+        'exact': false,
+        'type': 'command',
+        'compare': '>unlisten',
+        'description': 'remove yourself to monitoring alerts for a twitter feed',
+        'usage': '>unlisten <twitter_handle>',
+        'action': (message) => {
+            var variables = message.content.split(' ')
+            if (variables.length < 2) {
+                message.channel.send(`You need to specify a twitter handle to listen for.`)
+                return;
+            }
+
+            mongo.remove_listener(variables[1], message.guild.id, message.author.id)
+                .then((result) => {
+                    message.channel.send(`Successfully removed you from notifications for ${variables[1]}`)
+                }).catch((err) => {
+                    message.channel.send(`Ran into an error removing you as a listener.`)
                 })
         }
     },
