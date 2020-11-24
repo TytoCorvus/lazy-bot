@@ -17,7 +17,7 @@ function generate_twitter_links(discord_client) {
             twitter.find_recent_matching_tweets(monitor)
                 .then((tweets) => {
                     tweets.forEach((tweet_id) => {
-                        mongo.get_reported_tweets(monitor.twitter_handle)
+                        mongo.get_reported_tweets(monitor.twitter_handle, monitor.guild_id)
                             .then((tweets_reported) => {
                                 if (tweets_reported != undefined && tweets_reported != null && !tweets_reported.includes(tweet_id)) {
                                     var twitter_link = twitter.build_status_link(tweet_id)

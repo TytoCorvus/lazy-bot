@@ -133,12 +133,13 @@ class MONGO_DAO {
 })
 }
 
-    MONGO_DAO.prototype.get_reported_tweets = function (twitter_handle) {
+    MONGO_DAO.prototype.get_reported_tweets = function (twitter_handle, guild_id) {
     const collection = this.client.db(this.DATABASE_NAME).collection(this.REPORTING_HISTORY_COLLECTION)
 
     return new Promise((resolve, reject) => {
     collection.findOne({
-    'twitter_handle': twitter_handle
+    'twitter_handle': twitter_handle,
+    'guild_id': guild_id
 }, (err, result) => {
     if (!err) {
     resolve((result != null && result.tweet_ids != null) ?result.tweet_ids: [])
