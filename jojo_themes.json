@@ -1,0 +1,107 @@
+[
+    {
+        "name": "jonathan",
+        "beatdown": true,
+        "link": "https://www.youtube.com/watch?v=NvontyBNC44"
+    },
+    {
+        "name": "joseph",
+        "beatdown": true,
+        "link": "https://www.youtube.com/watch?v=XneukMwAGL8"
+    },
+    {
+        "name": "jotaro",
+        "beatdown": true,
+        "link": "https://www.youtube.com/watch?v=NFjE5A4UAJI"
+    },
+    {
+        "name": "josuke",
+        "beatdown": true,
+        "link": "https://www.youtube.com/watch?v=xRGrfurZaNQ"
+    },
+    {
+        "name": "giorno",
+        "beatdown": true,
+        "link": "https://www.youtube.com/watch?v=2MtOpB5LlUA"
+    },
+    {
+        "name": "awaken",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=XUhVCoTsBaM"
+    },
+    {
+        "name": "kira",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=9yGGNohmAT0"
+    },
+    {
+        "name": "phantom",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=NvontyBNC44"
+    },
+    {
+        "name": "bloody",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=hmpJqJLsR48"
+    },
+    {
+        "name": "stream",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=hmpJqJLsR48"
+    },
+    {
+        "name": "crusaders",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=UF3v7Nr7YMs"
+    },
+    {
+        "name": "stardust",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=UF3v7Nr7YMs"
+    },
+    {
+        "name": "train",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=oG7jKUHsLfY"
+    },
+    {
+        "name": "diamond",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=0EX6L6jCaLw"
+    },
+    {
+        "name": "crazy",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=0EX6L6jCaLw"
+    },
+    {
+        "name": "chase",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=HYNK0YRqZb4"
+    },
+    {
+        "name": "gold",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=PANGjAyF4CQ"
+    },
+    {
+        "name": "vento",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=PANGjAyF4CQ"
+    },
+    {
+        "name": "aureo",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=PANGjAyF4CQ"
+    },
+    {
+        "name": "traitor",
+        "beatdown": false,
+        "link": "https://www.youtube.com/watch?v=fqBNnC_apV4"
+    },
+    {
+        "name": "piano",
+        "beatdown": false,
+        "link": "https://youtu.be/2MtOpB5LlUA?t=222"
+    }
+]

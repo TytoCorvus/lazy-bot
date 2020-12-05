@@ -316,6 +316,50 @@ var responses = [
                     message.channel.send(`There was an error updating the default channel`)
                 })
         }
+    },
+    {
+        'exact': false,
+        'type': 'command',
+        'compare': '>JJBA',
+        'description': 'Used to link JoJo themes! Try: Joseph, Giorno, Crusaders, Beatdown',
+        'usage': '>JJBA <theme>',
+        'action': (message) => {
+            var variables = message.content.trim().split(' ')
+
+            mongo.get_jojo_themes((themes_array) => {
+                if (!themes_array || themes_array.length == 0) {
+                    message.channel.send('Had an issue finding the themes... :\\')
+                    return;
+                }
+
+                var chosen = variables[1]
+                if (chosen == undefined || chosen == null) {
+                    var theme_chosen = Math.floor(Math.random() * themes_array.length) //Get a random theme from the list provided
+                    message.channel.send(themes_array[theme_chosen].link)
+                } else {
+                    var chosen_lower = chosen.toLowerCase()
+
+                    if (chosen_lower === 'list') {
+                        var response_string = 'Theme names that work are:\n'
+                        themes_array.forEach(theme => { response_string += `${theme.name}\n` })
+                        message.channel.send(response_string)
+                    } else if (chosen_lower === 'beatdown') {
+                        var beatdowns_array = themes_array.filter(theme => { return theme.beatdown })
+                        var theme_chosen = Math.floor(Math.random() * beatdowns_array.length)
+                        message.channel.send(beatdowns_array[theme_chosen].link)
+                    } else {
+                        var matching_themes_array = themes_array.filter(theme => { return theme.name === chosen_lower })
+
+                        if (matching_themes_array.length <= 0) {
+                            message.channel.send('I couldn\'t find a JoJo theme with that name')
+                            return;
+                        }
+
+                        message.channel.send(matching_themes_array[0].link)
+                    }
+                }
+            })
+        }
     }
 ]
 
