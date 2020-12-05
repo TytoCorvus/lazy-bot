@@ -13,15 +13,14 @@ MESSAGE_UTILS.prototype.parse_command_from_parts = function (message_text) {
         users: []
     }
 
-    results.command = message_text.match('>[a-zA-Z_]+')[0]
-    message_text.match(`(${this.OPTION_CHAR}[a-zA-Z]+)|${OPTION_CHAR}[a-zA-Z]+=[^.\s\n<>@]+`).forEach( option => {
-        var option_name = parse_option_from_word(option)
-        
-        if(option.includes('=')){
+    results.command = message_text.match(/^>[a-zA-Z_]+\s?/)[0]
+    if(!results.command)
+        return false
 
-        }else {
-            //results.options[]
-        }
+    message_text.match(`(${this.OPTION_CHAR}.+`).forEach( option => {
+        var option_name = parse_option_from_word(option)
+        var option_value = this.parse_value_from_word(option)
+        results.options[option_name] = option_value
     })
 
     return results
