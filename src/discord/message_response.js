@@ -1,6 +1,6 @@
-var Twitter = require('../twitter/Twitter')
-var mongo = require('../mongo/mongo_dao')
-var twitter = new Twitter()
+const Twitter = require('../twitter/Twitter')
+const mongo = require('../mongo/mongo_dao')
+const twitter = new Twitter()
 
 function message_response(message) {
     if (message.author.bot) { return; } //Don't respond to bots

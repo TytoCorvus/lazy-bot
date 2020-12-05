@@ -188,6 +188,7 @@ class MONGO_DAO {
     'twitter_handle': twitter_handle,
     'guild_id': guild_id
 }, (err, result) => {
+    
     if (!err) {
     resolve((result != null && result.tweet_ids != null) ?result.tweet_ids: [])
 } else {
