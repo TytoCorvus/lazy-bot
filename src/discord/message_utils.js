@@ -7,7 +7,7 @@ class MESSAGE_UTILS {
     QUOTES_REGEX = /^["'].*["']$/
 }
 
-MESSAGE_UTILS.prototype.parse(argsString){
+MESSAGE_UTILS.prototype.parse = function (argsString){
     return this.parseCommandToObject(this.splitToArgsArray(argsString))
 }
 
