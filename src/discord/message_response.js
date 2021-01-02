@@ -176,8 +176,7 @@ var responses = [
         },
         'action': (message) => {
             var { words, options } = message_utils.parse(message.content)
-
-            var phrases_array = words.filter(keyword => !keyword.match('@')) //phrases not including user mentions
+            var phrases_array = words.splice(1, words.length - 1).filter(keyword => !keyword.match('@')) //phrases not including user mentions
 
             var user_arr = message.mentions.users.map(user => user.id)
             if (!user_arr.includes(message.author.id)) {
