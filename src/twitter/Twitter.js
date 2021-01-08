@@ -3,11 +3,19 @@ var { StringDecoder } = require('string_decoder')
 var twitter_vars = require('../../env_variables/twitter_vars')
 
 const TWITTER_BEARER_TOKEN = twitter_vars.bearer_token
-const TWITTER_HOSTNAME = 'api.twitter.com'
-const SEARCH_PATH = '/2/tweets/search/recent'
+//const TWITTER_HOSTNAME = 'api.twitter.com'
 
 class Twitter { 
-    STATUS_URI_BASE = `twitter.com/i/web/status/`
+    constructor(isDevEnv = false){
+        if(isDevEnv){
+            this.TARGET_HOST = 'api.twitter.com'
+        } else {
+            this.TARGET_HOST = 'api.twitter.com'
+        }
+    }
+
+    SEARCH_PATH = '/2/tweets/search/recent'
+    STATUS_PATH = `/i/web/status/`
 };
 
 Twitter.prototype.find_recent_matching_tweets = function (match_options) {
@@ -26,8 +34,8 @@ Twitter.prototype.search_recent_tweets = function (twitter_handle, callback, err
 
     var request_options = 
     {
-        hostname: TWITTER_HOSTNAME,
-        path: SEARCH_PATH + `?query=from:${twitter_handle }`,
+        hostname: this.TARGET_HOST,
+        path: this.SEARCH_PATH + `?query=from:${twitter_handle }&tweet.fields=referenced_tweets`,
         method: `GET`,
         headers: {
             Authorization: `Bearer ${TWITTER_BEARER_TOKEN}`
@@ -74,7 +82,7 @@ Twitter.prototype.tweet_matches = function (tweet, phrases_array, all_present, c
 }
 
 Twitter.prototype.build_status_link = function(tweet_id){
-    return 'https://' + this.STATUS_URI_BASE + tweet_id
+    return 'https://' + this.TARGET_HOST + this.STATUS_PATH + tweet_id
 }
 
 module.exports = Twitter

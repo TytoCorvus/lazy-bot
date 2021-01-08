@@ -37,7 +37,3 @@ test('testParseValue', (t) => {
     var value_as_float = '.option=49.99'
     t.is(utils.parse_value_from_word(value_as_float), 49.99)
 })
-
-test('testParseCommand', (t) => {
-    
-})
