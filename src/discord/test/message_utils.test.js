@@ -3,37 +3,59 @@ var MESSAGE_UTILS = require('../message_utils')
 
 const utils = new MESSAGE_UTILS()
 
-test('testParseOption', (t) => {
-    var apply = (variable) => {return utils.parse_option_from_word(variable)}
-    var option_string_simple = '.option'
-    t.is(apply(option_string_simple), 'option')
+test('testTrimQuotes', (t) => {
+    var apply = (variable) => { return utils.trimQuotes(variable) }
 
-    var option_string_incorrect = 'noOptionCharacter'
-    t.is(utils.parse_option_from_word(option_string_incorrect), false)
+    var single_quote = '\'word\''
+    var double_quotes = '\"word\"'
 
-    var option_string_with_value = '.option=true'
-    t.is(utils.parse_option_from_word(option_string_with_value), 'option')
+    t.is(apply(single_quote), 'word')
+    t.is(apply(double_quotes), 'word')
 })
 
-test('testParseValue', (t) => {
-    var no_value = '.option'
-    t.is(utils.parse_value_from_word(no_value), false)
+test('testParseOptions', (t) => {
+    var apply = (variable) => { return utils.parseOption(variable) }
 
-    var true_value = '.option=true'
-    t.is(utils.parse_value_from_word(true_value), true)
+    var basicOption = '--flag'
+    t.deepEqual(apply(basicOption), ['flag', true])
 
-    var false_value_with_caps = '.option=FalSE'
-    t.is(utils.parse_value_from_word(false_value_with_caps), false)
+    var basicOptionOneDash = '-flag'
+    t.deepEqual(apply(basicOptionOneDash), ['flag', true])
 
-    var value_with_spaces = '.option=Magikarp is evolving!'
-    t.is(utils.parse_value_from_word(value_with_spaces), 'Magikarp')
-    
-    var value_with_some_numbers = '.option=123abc123'
-    t.is(utils.parse_value_from_word(value_with_some_numbers), '123abc123')
+    var basicOptionWithParam = '--flag=name'
+    t.deepEqual(apply(basicOptionWithParam), ['flag', 'name'])
 
-    var value_as_int = '.option=100'
-    t.is(utils.parse_value_from_word(value_as_int), 100)
+    var basicOptionWithQuotedParam = '--flag="Multiple word parameter"'
+    t.deepEqual(apply(basicOptionWithQuotedParam), ['flag', "Multiple word parameter"])
 
-    var value_as_float = '.option=49.99'
-    t.is(utils.parse_value_from_word(value_as_float), 49.99)
+    var basicOptionWithParam = '--flag=True'
+    t.deepEqual(apply(basicOptionWithParam), ['flag', true])
+
+    var basicOptionWithParam = '--flag="True"'
+    t.deepEqual(apply(basicOptionWithParam), ['flag', "True"])
+
+    var basicOptionWithParam = '--flag=false'
+    t.deepEqual(apply(basicOptionWithParam), ['flag', false])
+
+    var basicOptionWithParam = '--flag=5'
+    t.deepEqual(apply(basicOptionWithParam), ['flag', 5])
+
+    var basicOptionWithParam = '--flag=1.58096'
+    t.deepEqual(apply(basicOptionWithParam), ['flag', 1.58096])
+})
+
+test('testParseCommand', (t) => {
+    var apply = (variable) => { return utils.parseCommandToObject(utils.splitToArgsArray(variable)) }
+
+    var testString = `>monitors twitterhandle "Watching for words" "Something" @TytoCorvus --retweets=false -head="Caught one"`
+    var expectedResult = {
+        command: '>monitors',
+        words: ["twitterhandle", "Watching for words", "Something", "@TytoCorvus"],
+        options: {
+            retweets: false,
+            head: "Caught one"
+        }
+    }
+
+    t.deepEqual(apply(testString), expectedResult)
 })

@@ -1,6 +1,8 @@
 const Twitter = require('../twitter/Twitter')
+const MESSAGE_UTILS = require('./message_utils')
 const mongo = require('../mongo/mongo_dao')
 const twitter = new Twitter()
+const message_utils = new MESSAGE_UTILS()
 
 function message_response(message) {
     if (message.author.bot) { return; } //Don't respond to bots
@@ -167,25 +169,31 @@ var responses = [
         'type': 'command',
         'compare': '>add_monitor',
         'description': 'Add an account to monitor and the keywords to look for. Automatically tags the creator.',
-        'usage': '>add_monitor <twitter_handle> <keyword>... <User Mention>...',
+        'usage': '>add_monitor <twitter_handle> <keyword>... <User Mention>... <Option>...',
+        'options': {
+            retweets: "true/false",
+            all: "true/false"
+        },
         'action': (message) => {
-            var variables = message.content.split(' ')
-
-            var keywords_array = variables.splice(2, variables.length - 2).filter(keyword => !keyword.match('@')) //phrases not including user mentions
+            var { words, options } = message_utils.parse(message.content)
+            var phrases_array = words.splice(1, words.length - 1).filter(keyword => !keyword.match('@')) //phrases not including user mentions
 
             var user_arr = message.mentions.users.map(user => user.id)
-            user_arr.push(message.author.id)
+            if (!user_arr.includes(message.author.id)) {
+                user_arr.push(message.author.id)
+            }
 
             mongo.insert_monitor({
-                twitter_handle: variables[1],
-                keywords: keywords_array,
+                twitter_handle: words[0],
+                keywords: phrases_array,
                 all_present: false,
                 guild_id: message.guild.id,
-                users_listening: user_arr
+                users_listening: user_arr,
+                options: { ...options }
             })
-                .then((result) => { message.channel.send(`Successfully created your requested monitor!`) })
-                .catch((err) => { message.channel.send(`I had an issue creating this monitor - No changes saved.`) })
-                .finally(() => { mongo.insert_author(variables[1], message.guild.id).then(result => { }).catch((err) => { console.log(`Error inserting author for monitor. ${err}`) }) })
+                .then(() => { message.channel.send(`Successfully created your requested monitor!`) })
+                .catch(() => { message.channel.send(`I had an issue creating this monitor - No changes saved.`) })
+                .finally(() => { mongo.insert_author(words[0], message.guild.id).then(result => { }).catch((err) => { console.log(`Error inserting author for monitor. ${err}`) }) })
         }
     },
     {
