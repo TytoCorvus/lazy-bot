@@ -8,7 +8,6 @@ function start_intervals(discord_client) {
     generate_twitter_links(discord_client)
 
     var monitor_interval = setInterval(() => {
-        console.log('running')
         generate_twitter_links(discord_client)
     }, update_period_ms)
 }

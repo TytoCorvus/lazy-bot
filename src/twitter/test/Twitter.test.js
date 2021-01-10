@@ -4,8 +4,7 @@ const Twitter = require('../Twitter')
 var instance = new Twitter()
 
 test('checkTwitterAPI', async t => {
-    return instance.find_recent_matching_tweets({twitter_handle:'TytoCorvus', keywords:[]}).then(() => {t.pass()}).catch((err) => {console.log(err); t.fail(err)})
-    //return instance.search_recent_tweets('TytoCorvus').then(() => {t.pass()}).catch((err) => {t.fail(err)})
+    return instance.find_recent_matching_tweets({twitter_handle:'jack', keywords:[]}).then(() => {t.pass()}).catch((err) => {console.log(err); t.fail(err)})
 })
 
 test('checkTweetMatchesTest', t => {
