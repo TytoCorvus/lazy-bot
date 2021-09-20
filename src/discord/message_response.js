@@ -1,8 +1,12 @@
 const Twitter = require('../twitter/Twitter')
 const MESSAGE_UTILS = require('./message_utils')
 const mongo = require('../mongo/mongo_dao')
-const twitter = new Twitter()
+
 const message_utils = new MESSAGE_UTILS()
+const DUSTLOOP = require('../web/dustloop')
+
+const twitter = new Twitter()
+const dustloop = new DUSTLOOP()
 
 function message_response(message) {
     if (message.author.bot) { return; } //Don't respond to bots
@@ -92,53 +96,6 @@ var responses = [
         'compare': 'ping',
         'action': (message) => {
             message.channel.send('pong')
-        }
-    },
-    {
-        'exact': true,
-        'type': 'keyword',
-        'compare': 'Nate is...',
-        'action': (message) => {
-            message.channel.send('Great!')
-        }
-    },
-    {
-        'exact': true,
-        'type': 'keyword',
-        'compare': '1 2 3',
-        'action': (message) => {
-            message.channel.send('PRICING!')
-        }
-    },
-    {
-        'exact': false,
-        'type': 'keyword',
-        'compare': 'Dayne',
-        'action': (message) => {
-            message.channel.send(`I heard about him. He's VERY stinky.`)
-        }
-    },
-    {
-        'exact': false,
-        'type': 'command',
-        'compare': '>twitter_test',
-        'description': 'Basic twitter search functionality - provide a twitter handle and a keyword list to search their recent tweets for that word. Will link the first one found.',
-        'usage': '>twitter_test <twitter_handle> <keyword>...',
-        'action': (message) => {
-            var variables = message.content.split(' ')
-            if (variables.length > 1) {
-                twitter.find_recent_matching_tweets({ twitter_handle: variables[1], phrases_array: variables.splice(2, variables.length - 2), all_present: false })
-                    .then((id_array) => {
-                        if (id_array == undefined || id_array.length == 0) {
-                            message.channel.send(`I'm sorry, I wasn't able to find any tweets like that`)
-                        } else {
-                            message.channel.send(twitter.build_status_link(id_array[0]))
-                        }
-                    })
-                    .catch((err) => {
-                        message.channel.send(`I erred out, man, idk. Tell Tyto to get his shit together.`)
-                    })
-            }
         }
     },
     {
@@ -367,6 +324,60 @@ var responses = [
                     }
                 }
             })
+        }
+    },
+    {
+        exact: false,
+        type: 'command',
+        compare: '>GG',
+        description: 'Used to gather Guilty Gear Strive frame data from Dustloop',
+        usage: '>GG *character* *move* *specific field',
+        action: (message) => {
+            var { words, options } = message_utils.parse(message.content)
+
+            switch(words.length){
+                case 0:
+                    message.channel.send(`Please specify a character.`);
+                    break;
+                case 1:
+                    dustloop.get_system_data(words[0]).then(
+                        result => {message.channel.send(result);}
+                    ).catch(
+                        err => {message.channel.send(`There was an issue collecting this character's system data.`)}
+                    );
+                    break;
+                case 2:
+                    if(words[1] === 'system'){
+                        dustloop.get_system_data(words[0]).then(
+                            result => {message.channel.send(result);}
+                        ).catch(
+                            err => {message.channel.send(`There was an issue collecting this character's system data.`)}
+                        );
+                    } else {
+                        dustloop.get_move_data(words[0], words[1]).then(
+                            result => {message.channel.send(result);}
+                        ).catch(
+                            err => {message.channel.send(`There was an issue collecting this character's move data.`)}
+                        );
+                    }
+                    break;
+                case 3:
+                default:
+                    if(words[1] === 'system'){
+                        dustloop.get_system_data(words[0], words[2]).then(
+                            result => {message.channel.send(result);}
+                        ).catch(
+                            err => {message.channel.send(`There was an issue collecting this character's system data.`)}
+                        );
+                    } else {
+                        dustloop.get_move_data(words[0], words[1], words[2]).then(
+                            result => {message.channel.send(result);}
+                        ).catch(
+                            err => {message.channel.send(`There was an issue collecting this character's move data.`)}
+                        );
+                    }
+                    break;
+            }
         }
     }
 ]

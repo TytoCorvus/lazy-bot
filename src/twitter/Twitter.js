@@ -21,7 +21,8 @@ Twitter.prototype.find_recent_matching_tweets = function (match_options) {
     return new Promise((resolve, reject) => {
         this.search_recent_tweets(twitter_handle)
             .then(
-                (data) => {resolve(this.filter_to_matching_tweets(JSON.parse(data), match_options).map(tweet => tweet.id))
+                (data) => 
+                {resolve(this.filter_to_matching_tweets(JSON.parse(data), match_options).map(tweet => tweet.id))
             })
             .catch((err) => {
                 reject(err)
