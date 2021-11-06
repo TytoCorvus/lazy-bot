@@ -9,6 +9,7 @@ class MONGO_DAO {
         this.REPORTING_HISTORY_COLLECTION = 'tweets_reported';
         this.GUILD_SETTINGS = 'guild_settings';
         this.JOJO_COLLECTION = 'jojo_themes';
+        this.COUNTING = 'counting';
 
         this.client.connect();
     }
@@ -246,6 +247,67 @@ MONGO_DAO.prototype.get_jojo_themes = function (callback) {
     })
     cursor.forEach((item) => results.push(item), () => {
         callback(results);
+    })
+}
+
+MONGO_DAO.prototype.inc_count = function (guild_id, count_name) {
+    const collection = this.client.db(this.DATABASE_NAME).collection(this.COUNTING)
+
+    return new Promise((resolve, reject) => {
+            collection.updateOne({
+                'guild_id': guild_id,
+                'count_name': count_name
+            }, {
+                '$set': { 'guild_id': guild_id,
+                            'count_name': count_name},
+                '$inc': {'count': 1}
+            }, {
+                upsert: true
+            }).then( _ => {
+                collection.findOne({
+                    'guild_id': guild_id,
+                    'count_name': count_name
+                }).then(data => resolve(data))
+            })
+        })
+}
+
+MONGO_DAO.prototype.update_count = function (guild_id, count_name, count_no) {
+    const collection = this.client.db(this.DATABASE_NAME).collection(this.COUNTING)
+
+    collection.updateOne({
+        'guild_id': guild_id,
+        'count_name': count_name
+    }, {
+        'guild_id': guild_id,
+        'count_name': count_name,
+        '$set': {'count': count_no}
+    }, {
+        upsert: true
+    })
+    .then( _ => {
+        collection.findOne({
+            'guild_id': guild_id,
+            'count_name': count_name
+        }).then(data => resolve(data))
+    })
+    .catch((err) => reject(err))
+}
+
+MONGO_DAO.prototype.get_count = function (guild_id, search) {
+    const collection = this.client.db(this.DATABASE_NAME).collection(this.COUNTING)
+
+    return new Promise((resolve) => {
+        const cursor = collection.find({
+            'guild_id': guild_id,
+            'count_name': { '$regex' : `.*${search}.*` }
+        })
+    
+        const agg = []
+        cursor.forEach(found => {
+            agg.push({'count_name': found.count_name, 'count': found.count})}, () => {
+                resolve(agg);
+            })
     })
 }
 

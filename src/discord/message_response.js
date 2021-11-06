@@ -379,6 +379,56 @@ var responses = [
                     break;
             }
         }
+    },
+    {
+        'exact': false,
+        'type': 'command',
+        'compare': '>count',
+        description: 'Increment the named count and return the new number',
+        'action': (message) => {
+            var { words } = message_utils.parse(message.content)
+
+            if(words.length < 1){
+                message.channel.send('You need to specify the name of the count i\'m keeping track of.')
+            }
+
+            mongo.inc_count(message.guild.id, words[0])
+            .then( data => {
+                message.channel.send(`${data.count_name}: ${data.count}`)
+            })
+            .catch( err => {
+                console.log(err.message)
+            })
+        }
+    },
+    {
+        'exact': false,
+        'type': 'command',
+        'compare': '>get_count',
+        description: 'Get all count objects that include the phrase provided',
+        'action': (message) => {
+            var { words } = message_utils.parse(message.content)
+
+            if(words.length < 1){
+                message.channel.send('You need to specify the name of the count i\'m looking for.')
+            }
+
+            mongo.get_count(message.guild.id, words[0]).then( all_counts => {
+                let msg;
+            if(all_counts.length == 0){
+                message.channel.send(`I didn't find any counts matching the name "${words[0]}"`) 
+            }
+            else if(all_counts.length > 1){
+                msg = `Multiple counts match "${words[0]}": \n` + all_counts.map(count => `${count.count_name}: ${count.count}`).join(`\n`);
+                message.channel.send(msg)
+            } else {
+                msg = `${all_counts[0].count_name}: ${all_counts[0].count}`
+                message.channel.send(msg)
+            }}).catch(err => {
+                console.log(err.message)
+                message.channel.send(`There was an error getting the counts you requested`)
+            })   
+        }
     }
 ]
 
