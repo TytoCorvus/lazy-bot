@@ -253,7 +253,7 @@ MONGO_DAO.prototype.get_jojo_themes = function (callback) {
 MONGO_DAO.prototype.inc_count = function (guild_id, count_name) {
     const collection = this.client.db(this.DATABASE_NAME).collection(this.COUNTING)
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
             collection.updateOne({
                 'guild_id': guild_id,
                 'count_name': count_name
@@ -275,23 +275,25 @@ MONGO_DAO.prototype.inc_count = function (guild_id, count_name) {
 MONGO_DAO.prototype.update_count = function (guild_id, count_name, count_no) {
     const collection = this.client.db(this.DATABASE_NAME).collection(this.COUNTING)
 
-    collection.updateOne({
-        'guild_id': guild_id,
-        'count_name': count_name
-    }, {
-        'guild_id': guild_id,
-        'count_name': count_name,
-        '$set': {'count': count_no}
-    }, {
-        upsert: true
-    })
-    .then( _ => {
-        collection.findOne({
+    return new Promise((resolve) => {
+        collection.updateOne({
             'guild_id': guild_id,
             'count_name': count_name
-        }).then(data => resolve(data))
-    })
-    .catch((err) => reject(err))
+        }, {
+            '$set': {   'guild_id': guild_id,
+                        'count_name': count_name},
+            '$set': {'count': count_no}
+        }, {
+            upsert: true
+        })
+        .then( _ => {
+            collection.findOne({
+                'guild_id': guild_id,
+                'count_name': count_name
+            }).then(data => resolve(data))
+        })
+        .catch((err) => reject(err))
+    });
 }
 
 MONGO_DAO.prototype.get_count = function (guild_id, search) {

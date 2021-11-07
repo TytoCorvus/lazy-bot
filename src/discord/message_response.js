@@ -1,11 +1,8 @@
-const Twitter = require('../twitter/Twitter')
 const MESSAGE_UTILS = require('./message_utils')
 const mongo = require('../mongo/mongo_dao')
-
 const message_utils = new MESSAGE_UTILS()
 const DUSTLOOP = require('../web/dustloop')
 
-const twitter = new Twitter()
 const dustloop = new DUSTLOOP()
 
 function message_response(message) {
@@ -40,7 +37,7 @@ var responses = [
         'description': 'Lists the commands that I can use',
         'usage': '',
         'action': (message) => {
-            var response_message = commands().map(response => response.compare).join('\n')
+            var response_message = commands().map(response => response.compare).sort((a, b) => a > b ? 1 : -1).join('\n')
             message.channel.send(`These are the commands that I know:\n${response_message}`)
         }
     },
@@ -55,34 +52,14 @@ var responses = [
         }
     },
     {
-        'exact': true,
-        'type': 'command',
-        'compare': '>who',
-        'description': 'Quick overview of my purpose',
-        'usage': '',
-        'action': (message) => {
-            message.channel.send(`I am a bot! I do stupid things for stupid reasons.`)
-        }
-    },
-    {
-        'exact': true,
-        'type': 'command',
-        'compare': '>what',
-        'description': 'Quick overview of my tasks',
-        'usage': '',
-        'action': (message) => {
-            message.channel.send(`I have currently been tasked with monitoring Twitter for updates with certain words in them`)
-        }
-    },
-    {
         'exact': false,
         'type': 'command',
         'compare': '>usage',
         'description': 'Explain how to use a command',
-        'usage': '$usage <command>',
+        'usage': '>usage <command>',
         'action': (message) => {
             var command_text = message.content.split(' ')[1]
-            var commands_filtered = commands().filter(item => item.compare === command_text)
+            var commands_filtered = commands().filter(item => item.compare === command_text || item.compare.substr(1) === command_text)
             if (commands_filtered.length == 0) {
                 message.channel.send(`Could not find a command by that name`)
             } else {
@@ -384,7 +361,8 @@ var responses = [
         'exact': false,
         'type': 'command',
         'compare': '>count',
-        description: 'Increment the named count and return the new number',
+        'description': 'Increment the named count and return the new number',
+        'usage': '>count <count_name>',
         'action': (message) => {
             var { words } = message_utils.parse(message.content)
 
@@ -405,7 +383,8 @@ var responses = [
         'exact': false,
         'type': 'command',
         'compare': '>get_count',
-        description: 'Get all count objects that include the phrase provided',
+        'description': 'Get all count objects that include the phrase provided',
+        'usage': '>get_count <count_name>',
         'action': (message) => {
             var { words } = message_utils.parse(message.content)
 
@@ -419,7 +398,9 @@ var responses = [
                 message.channel.send(`I didn't find any counts matching the name "${words[0]}"`) 
             }
             else if(all_counts.length > 1){
-                msg = `Multiple counts match "${words[0]}": \n` + all_counts.map(count => `${count.count_name}: ${count.count}`).join(`\n`);
+                msg = `Multiple counts match "${words[0]}": \n` + 
+                    all_counts.sort((a,b) => a.count_name > b.count_name ? 1 : -1)
+                        .map(count => `${count.count_name}: ${count.count}`).join(`\n`);
                 message.channel.send(msg)
             } else {
                 msg = `${all_counts[0].count_name}: ${all_counts[0].count}`
@@ -428,6 +409,30 @@ var responses = [
                 console.log(err.message)
                 message.channel.send(`There was an error getting the counts you requested`)
             })   
+        }
+    },
+    {
+        'exact': false,
+        'type': 'command',
+        'compare': '>set_count',
+        'description': 'Set the count object with the provided name to the value given',
+        'usage': '>set_count <count_name> <count_number>',
+        'action': (message) => {
+            var { words } = message_utils.parse(message.content)
+
+            if(words.length < 2){
+                message.channel.send('You need to specify the name of the count i\'m looking for, and the value it\'s being set to.')
+            } else if(!words[1] || isNaN(words[1])){
+                message.channel.send('the count you provide needs to be a whole number')
+            } else {
+                mongo.update_count(message.guild.id, words[0], Math.floor(words[1]))
+                .then( data => {
+                    message.channel.send(`"${data.count_name}" set to: ${data.count}`)
+                })
+                .catch( err => {
+                    console.log(err.message)
+                }) 
+            } 
         }
     }
 ]
